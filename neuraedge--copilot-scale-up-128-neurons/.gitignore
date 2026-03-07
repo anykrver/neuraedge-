@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor files
+*.swp
+*~
+.DS_Store
+
+# Generated weight files (created by make train_mnist)
+weights/*.pt
+weights/*.npy
+weights/*.hex
