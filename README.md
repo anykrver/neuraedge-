@@ -30,6 +30,7 @@ After understanding the fundamentals laid out in this project, you can explore t
 - [Example Networks](#example-networks)
   - [XOR Classification](#xor-classification)
   - [Pattern Recognition](#pattern-recognition)
+  - [MNIST Digit Recognition](#mnist-digit-recognition)
 - [Setup & Simulation](#setup--simulation)
 - [Advanced Functionality](#advanced-functionality)
 
@@ -71,31 +72,39 @@ The chip processes input data encoded as spike trains, routes spikes through a n
 
 ## Architecture
 
-NeuraEdge is built with **fewer than 12 fully documented SystemVerilog files** and is designed so that each file can be read and understood independently.
+NeuraEdge ships in **two configurations** — a 32-neuron XOR baseline and a 128-neuron MNIST classifier. Both share the same neuron core, STDP engine, encoder, and scheduler; they differ only in synaptic memory width and router pipeline depth.
 
 ```
 neuraedge/
 ├── src/
-│   ├── neuraedge.sv          # Top-level chip
+│   ├── neuraedge.sv          # Top-level chip (32-neuron XOR baseline)
+│   ├── neuraedge_mnist.sv    # Top-level chip (128-neuron MNIST)
+│   ├── neuraedge_top.sv      # Basys 3 FPGA board wrapper
 │   ├── neuron.sv             # LIF neuron core
 │   ├── neuron_array.sv       # Parallel neuron array (N neurons)
-│   ├── synapse_mem.sv        # Synaptic weight BRAM
-│   ├── spike_router.sv       # AER event bus & routing
+│   ├── synapse_mem.sv        # Synaptic weight BRAM (32×32, single bank)
+│   ├── synapse_mem_128.sv    # Synaptic weight BRAM (128×128, 4-bank)
+│   ├── spike_router.sv       # AER event bus & routing (32-neuron)
+│   ├── spike_router_128.sv   # Pipelined AER router (128-neuron)
 │   ├── stdp.sv               # Spike-Timing-Dependent Plasticity
 │   ├── scheduler.sv          # Event-driven dispatch
 │   ├── encoder.sv            # Rate/temporal spike encoder
-│   └── decoder.sv            # Spike count output decoder
+│   └── decoder.sv            # Argmax spike-count output decoder
 ├── tests/
-│   ├── neuron_tb.sv          # Single neuron testbench
-│   ├── network_tb.sv         # Full network integration test
-│   └── stdp_tb.sv            # Learning rule verification
+│   ├── neuron_tb.sv          # Single neuron unit tests
+│   ├── network_tb.sv         # XOR chip integration tests (9 phases)
+│   └── mnist_tb.sv           # 128-neuron MNIST testbench (8 phases)
 ├── kernels/
-│   ├── xor_network.py        # XOR spike-encoded test
-│   └── pattern_classify.py   # 4-class pattern recognition
+│   ├── xor_network.py        # XOR spike-encoded simulation
+│   ├── pattern_classify.py   # 4-class pattern recognition
+│   └── mnist_train.py        # MNIST SNN training + weight export
+├── weights/                  # Generated weight files (git-ignored)
 └── README.md
 ```
 
 ### Top-Level Architecture Diagram
+
+The 128-neuron MNIST configuration (`neuraedge_mnist.sv`):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -103,28 +112,31 @@ neuraedge/
 │                                                                 │
 │  ┌──────────┐    ┌─────────────────────────────────────────┐   │
 │  │  Spike   │    │             Neuron Array                 │   │
-│  │ Encoder  │───▶│  [N0] [N1] [N2] ... [N31]               │   │
-│  └──────────┘    │   LIF  LIF  LIF       LIF               │   │
+│  │ Encoder  │───▶│  [N0] [N1] [N2] ... [N127]              │   │
+│  └──────────┘    │   LIF  LIF  LIF        LIF              │   │
 │                  └──────────────┬───────────────────────────┘   │
 │                                 │ Spike Events (AER)            │
 │                  ┌──────────────▼──────────────────────────┐   │
 │                  │           Spike Router                   │   │
-│                  │   routes spikes to target neurons        │   │
+│                  │   4-stage pipeline, 1 spike / 4 cycles   │   │
 │                  └──────────────┬──────────────────────────┘   │
 │                                 │                               │
 │            ┌────────────────────┤                               │
 │            │                   │                               │
 │  ┌─────────▼──────┐  ┌─────────▼──────┐                       │
 │  │  Synaptic Mem  │  │  STDP Engine   │                       │
-│  │  W[i,j] BRAM  │  │  Δw = f(Δt)   │                       │
-│  └────────────────┘  └────────────────┘                       │
+│  │  4-bank BRAM   │  │  Δw = f(Δt)   │                       │
+│  │ 128×128 × 8b   │  └────────────────┘                       │
+│  └────────────────┘                                            │
 │                                                                 │
 │  ┌──────────┐    ┌────────────────┐                            │
-│  │ Decoder  │◀───│   Scheduler    │                            │
-│  └──────────┘    │ event dispatch │                            │
-│                  └────────────────┘                            │
+│  │ Argmax   │◀───│   Scheduler    │                            │
+│  │ Decoder  │    │ event dispatch │                            │
+│  └──────────┘    └────────────────┘                            │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+The 32-neuron XOR baseline (`neuraedge.sv`) uses the same pipeline with a single-bank 32×32 BRAM and a simpler 4-state router FSM.
 
 ---
 
@@ -185,19 +197,35 @@ module neuron #(
 endmodule
 ```
 
-Each neuron maintains only its membrane potential as state — making it extremely lightweight. All 32 neurons in the array run in parallel every clock cycle.
+Each neuron maintains only its membrane potential as state — making it extremely lightweight. All neurons in the array run in parallel every clock cycle (32 in the XOR baseline, 128 in the MNIST configuration).
 
 ---
 
 ### Synaptic Memory
 
-The synaptic weight matrix `W[i][j]` stores the connection strength from pre-synaptic neuron `i` to post-synaptic neuron `j`. For a 32-neuron network this is a 32×32 matrix of 8-bit weights — only 1KB of storage.
+The synaptic weight matrix `W[i][j]` stores the connection strength from pre-synaptic neuron `i` to post-synaptic neuron `j`.
 
-**NeuraEdge synaptic memory specifications:**
-- 8-bit weight resolution (Q2.6 fixed-point, signed)
-- 32×32 weight matrix (1024 entries)
-- Dual-port BRAM: one port for read (spike routing), one for write (STDP updates)
+**32-neuron baseline (`synapse_mem.sv`):**
+- 32×32 matrix of 8-bit weights = 1KB
+- Single dual-port BRAM18K
 - Single-cycle read latency
+- Port A: read (spike router); Port B: write (config / STDP)
+
+**128-neuron MNIST (`synapse_mem_128.sv`):**
+- 128×128 matrix of 8-bit weights = 16KB
+- 4 parallel BRAM instances (32 columns each) — reading all 128 post-synaptic weights simultaneously would require a 1,024-bit-wide port (128 × 8 bits), which is impractical from a single BRAM tile. Splitting across 4 banks (256-bit each) lets all four be read in the same clock cycle
+- 2-cycle registered read pipeline
+- Port A: wide read (pre-index → all 128 post-synaptic weights in one read); Port S: narrow read for STDP/host; Port B: write
+
+```
+128-Neuron Bank Layout:
+  Bank 0: W[pre][0..31]    ← first 32 post-synaptic columns
+  Bank 1: W[pre][32..63]
+  Bank 2: W[pre][64..95]
+  Bank 3: W[pre][96..127]  ← last 32 post-synaptic columns
+
+All 4 banks read in parallel → 128 weights available after 2 cycles
+```
 
 ```
 Synapse Memory Layout:
@@ -226,20 +254,36 @@ When a neuron fires, it places its address (neuron index) on the AER bus. The ro
 3. Delivers weighted currents to all target neurons within the same timestep
 4. Forwards the event to the STDP engine for weight updates
 
+**32-neuron router (`spike_router.sv`):** 4-state FSM (IDLE → ARBITRATE → READ\_MEM → ACCUMULATE), single-cycle BRAM read, processes each destination weight sequentially — 3 cycles per spike event.
+
+**128-neuron router (`spike_router_128.sv`):** 5-state pipelined FSM that absorbs the 2-cycle BRAM read latency of the 4-bank memory:
+
 ```
-Spike Event from Neuron 5:
+FSM States:
+  S_IDLE       → wait for spikes in timestep
+  S_ARBITRATE  → priority-encode 128-bit spike vector, select lowest-index
+  S_WAIT_RD1   → BRAM read cycle 1 (registered pipeline stage)
+  S_WAIT_RD2   → BRAM read cycle 2 (data valid)
+  S_ACCUMULATE → 128× saturating add: I_syn[j] += W[pre][j]
+```
+
+Throughput: **4 cycles per spike event**. At 10% firing rate (≈13 spikes/timestep) this adds ~52 cycles of routing overhead per timestep.
+
+```
+Spike Event from Neuron 5 (128-neuron):
   ┌─────────────────────────────────────────────┐
   │  AER Bus: addr=5, spike=1                   │
   │                                             │
-  │  Router reads: W[5][0..31] from BRAM        │
-  │  Delivers:     I_syn[j] += W[5][j]          │
-  │                for all j in 0..31           │
+  │  Cycle 0: ARBITRATE → select pre=5          │
+  │  Cycle 1: WAIT_RD1  → BRAM read issued      │
+  │  Cycle 2: WAIT_RD2  → data arriving         │
+  │  Cycle 3: ACCUMULATE→ I_syn[0..127] updated │
   │                                             │
   │  STDP notified: pre_spike[5] = timestamp    │
   └─────────────────────────────────────────────┘
 ```
 
-**Arbitration:** When multiple neurons fire in the same timestep, the router processes them round-robin to prevent any single neuron from monopolizing the bus. In production neuromorphic chips (e.g., Loihi), this arbitration is one of the most complex subsystems — NeuraEdge uses a simple priority encoder for clarity.
+**Arbitration:** When multiple neurons fire in the same timestep, the router uses a priority encoder to process them one at a time (lowest index first). In production neuromorphic chips (e.g., Loihi), arbitration is one of the most complex subsystems — NeuraEdge uses a simple priority encoder for clarity.
 
 ---
 
@@ -421,7 +465,7 @@ This is computed in parallel across all neurons — every neuron integrates all 
 After integration, each neuron checks its membrane potential against its threshold. If `V >= V_threshold`, the neuron fires a spike and resets. This check happens combinatorially — no extra clock cycle needed.
 
 ### Stage 4: Route
-The spike router captures all firing neurons (the "spike vector") and distributes their output weights to the next layer. This is the most bandwidth-intensive stage — a full 32-neuron firing event requires reading 32 rows of synaptic memory.
+The spike router captures all firing neurons (the "spike vector") and distributes their output weights to the next layer. This is the most bandwidth-intensive stage — in the 32-neuron baseline each spike reads one 32-byte row; in the 128-neuron MNIST configuration a pipelined 4-bank BRAM read delivers all 128 weights in 2 cycles.
 
 ### Stage 5: Learn (optional)
 If STDP learning is enabled, the weight update engine computes `ΔW` for all synapse pairs involved in the current spike event. Weights are updated in-place in BRAM. During inference-only mode, this stage is bypassed entirely to save power.
@@ -532,22 +576,73 @@ After STDP training (500 timesteps), the network achieves >92% classification ac
 
 ---
 
+### MNIST Digit Recognition
+
+The 128-neuron configuration classifies handwritten digits from the MNIST dataset. This is the largest network NeuraEdge ships with, and is designed to fit on a Digilent Basys 3 board using only 4 of its 50 BRAM18K tiles.
+
+**Network topology:**
+
+```
+  Input   : neurons 0–63    (64 inputs — 28×28 image avg-pooled to 7×7, zero-padded)
+  Hidden  : neurons 64–117  (54 LIF neurons)
+  Output  : neurons 118–127 (10 neurons, one per digit class 0–9)
+```
+
+**Input pre-processing — why 4×4 average pooling?**
+
+784 raw MNIST pixels → 784 input neurons → 784×128 ≈ 100K synapses ≈ 98KB of weight storage. A Basys 3 has 50 BRAM18K tiles = 112.5KB total, leaving almost no room for anything else. Applying 4×4 average pooling first:
+
+```
+28×28 image  →  4×4 pool  →  7×7 feature map  →  zero-pad  →  64 inputs
+```
+
+The weight matrix shrinks to 128×128 = 16KB = 4 BRAMs (8% of the board).
+
+**Three-step flow:**
+
+```bash
+# Step 1 — structural RTL simulation (zero weights, tests all FSMs)
+make sim_mnist
+
+# Step 2 — train the SNN, export Q2.6 hex weights
+make train_mnist         # → weights/mnist_weights.hex
+
+# Step 3 — validate fixed-point accuracy matches float baseline
+make test_mnist_hw       # expected: ~90% on 1,000 test images
+```
+
+**Training script (`kernels/mnist_train.py`):**
+
+Downloads MNIST, applies 4×4 average pooling, trains a two-layer SNN (64→54→10) using surrogate-gradient descent, then quantizes all weights to Q2.6 fixed-point and exports a flat hex file for `$readmemh`:
+
+```python
+# Load trained weights into RTL simulation
+# Uncomment in synapse_mem_128.sv:
+# $readmemh("weights/mnist_weights.hex", weight_mem);
+```
+
+**Resource utilisation on Basys 3 (Artix-7 xc7a35t):**
+
+| Resource | 32-neuron XOR | 128-neuron MNIST |
+|----------|---------------|-----------------|
+| LUTs     | ~1,200  (4%)  | ~3,800  (11%)   |
+| FFs      | ~800          | ~2,400          |
+| BRAMs    | 1             | 4  (8%)         |
+| DSPs     | 0             | 0               |
+| Fmax     | ~180 MHz      | ~160 MHz        |
+| Inference time | ~54 µs  | ~162 µs         |
+
+---
+
 ## Setup & Simulation
 
 ### Requirements
 
-- `sv2v` — SystemVerilog to Verilog converter
-- `iverilog` — Icarus Verilog simulator
-- `python3` — for kernel generation and result visualization
+- `iverilog` — Icarus Verilog 10+ (supports SystemVerilog 2012 natively with `-g2012`)
+- `python3` — for kernel generation, MNIST training, and result visualisation
+- `numpy` — required for all Python kernels (`pip install numpy`)
+- (Optional) `sv2v` — SystemVerilog-to-Verilog converter for older tools
 - (Optional) Xilinx Vivado for FPGA synthesis
-
-### Install sv2v
-
-```bash
-# Download latest release from https://github.com/zachjs/sv2v/releases
-# Unzip and add to PATH
-export PATH=$PATH:/path/to/sv2v
-```
 
 ### Install Icarus Verilog
 
@@ -562,68 +657,68 @@ brew install icarus-verilog
 ### Clone & Simulate
 
 ```bash
-git clone https://github.com/your-username/neuraedge
-cd neuraedge
+git clone https://github.com/anykrver/neuraedge-
+cd neuraedge-
 
-# Create build directory
-mkdir build
+# Run all baseline tests (6 neuron unit tests + 13 network integration tests)
+make all
 
-# Convert SystemVerilog → Verilog
-sv2v src/*.sv -w build/
+# Run 128-neuron MNIST integration tests (16 structural tests, no weights needed)
+make sim_mnist
 
-# Compile testbench
-iverilog -o build/neuraedge_sim \
-    build/neuron.v \
-    build/neuron_array.v \
-    build/synapse_mem.v \
-    build/spike_router.v \
-    build/stdp.v \
-    build/scheduler.v \
-    build/encoder.v \
-    build/neuraedge.v \
-    tests/network_tb.sv
-
-# Run XOR simulation
-vvp build/neuraedge_sim +KERNEL=xor
-
-# Run pattern recognition simulation
-vvp build/neuraedge_sim +KERNEL=pattern
+# Run XOR Python simulation
+make sim_python
 ```
 
-### Expected Simulation Output
+### Available Make Targets
 
 ```
-[NeuraEdge] Loading XOR network configuration...
-[NeuraEdge] Network: 8 neurons, 32 synapses
-[NeuraEdge] STDP: disabled (inference mode)
-
-[t=0000] Encoding inputs: x1=1, x2=0
-[t=0001] N0 spike | I_syn[N2]+=0.8, I_syn[N3]+=0.6
-[t=0004] N3 fires | V=1.02 >= Vth=1.0
-[t=0007] N6 fires | Output spike #1
-...
-[t=0100] Inference complete.
-
-Output neuron N6 spike count: 34 / 100 timesteps
-Predicted class: XOR(1,0) = 1 ✓
-
---- All 4 XOR tests PASSED ---
+make sim_neuron     — Single LIF neuron unit tests   (6 tests)
+make sim_network    — XOR chip integration tests     (13 tests)
+make sim_mnist      — 128-neuron MNIST testbench     (16 tests)
+make train_mnist    — Train SNN, export hex weights  (~10 min CPU)
+make test_mnist_hw  — Validate Q2.6 quantised accuracy
+make sim_python     — Run XOR Python LIF simulation
+make wave_neuron    — neuron sim + GTKWave waveform viewer
+make wave_network   — network sim + GTKWave waveform viewer
+make clean          — Remove build/ directory
+make help           — Show all targets
 ```
 
-### FPGA Synthesis (Xilinx Artix-7)
+### MNIST Training & Validation
 
 ```bash
-# Open Vivado, create project targeting Digilent Basys 3 (xc7a35t)
-# Add all files from build/ directory
-# Set neuraedge.sv as top module
+# Train the SNN on MNIST and export Q2.6 weights to weights/mnist_weights.hex
+make train_mnist
+
+# Validate that Q2.6 quantised weights match float accuracy
+make test_mnist_hw
+```
+
+After training, uncomment the `$readmemh` line in `src/synapse_mem_128.sv` to load real weights into the RTL simulation:
+
+```systemverilog
+// In src/synapse_mem_128.sv — initial block:
+$readmemh("weights/mnist_weights.hex", weight_mem);
+```
+
+Then re-run `make sim_mnist` to verify inference end-to-end.
+
+### FPGA Synthesis (Xilinx Artix-7 / Basys 3)
+
+```bash
+# Open Vivado, create project targeting Digilent Basys 3 (xc7a35tcpg236-1)
+# Add all files from src/ directory
+# Set neuraedge_top.sv as top module (32-neuron XOR demo)
+#   OR neuraedge_mnist.sv for 128-neuron MNIST
+# Apply constraints from constraints/neuraedge_basys3.xdc
 # Run Synthesis → Implementation → Generate Bitstream
 
-# Expected resource utilization (32-neuron, 32×32 synapse):
-# LUTs:   ~1,200  (8% of Artix-7 35T)
-# FFs:    ~800
-# BRAM:   2 × 18Kb (1KB weight matrix + 1KB I/O buffer)
-# DSPs:   0        (all fixed-point, no DSP needed)
-# Fmax:   ~180 MHz
+# Board connections (neuraedge_top.sv):
+#   SW[0]  = input x1         SW[1]  = input x2
+#   BTNR   = run inference     BTNC   = reset
+#   LED[0] = inference done    LED[1] = XOR result
+#   LED[6] = heartbeat (1 Hz)  7-seg  = spike count
 ```
 
 ---
@@ -677,4 +772,3 @@ Inspired by [tiny-gpu](https://github.com/adam-maj/tiny-gpu) by Adam Majmudar �
 Neuron model based on: Gerstner, W. & Kistler, W.M. (2002). *Spiking Neuron Models*. Cambridge University Press.
 
 STDP rule based on: Bi, G. & Poo, M. (1998). Synaptic modifications in cultured hippocampal neurons. *Journal of Neuroscience*, 18(24), 10464–10472.
-# neuraedge-
