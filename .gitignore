@@ -10,3 +10,8 @@ __pycache__/
 *.swp
 *~
 .DS_Store
+
+# Generated weight files (created by make train_mnist)
+weights/*.pt
+weights/*.npy
+weights/*.hex
