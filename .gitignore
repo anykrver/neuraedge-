@@ -10,3 +10,12 @@ __pycache__/
 *.swp
 *~
 .DS_Store
+
+# Vivado generated files (keep vivado/reports/ and vivado/*.tcl in repo)
+vivado/*.log
+vivado/*.jou
+vivado/*.bit
+vivado/*.xsa
+vivado/.Xil/
+vivado/*_project/
+vivado/*.str

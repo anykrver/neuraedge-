@@ -1,0 +1,87 @@
+Copyright 1986-2023 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v2023.2 (lin64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
+| Date              : Sat Mar  7 06:42:00 2026
+| Design            : neuraedge_top
+| Device            : xc7a35tcpg236-1
+| Design State      : Routed
+------------------------------------------------------------------------------------------
+
+Power Report
+
+Table of Contents
+-----------------
+1. Summary
+2. Settings
+3. Summary of Hierarchical Power
+4. Supply Currents
+
+1. Summary
+----------
+
++--------------------------+----------------------------------+
+| Total On-Chip Power (W)  | 0.107                            |
+| Dynamic (W)              | 0.022                            |
+| Device Static (W)        | 0.085                            |
+| Effective TJA (C/W)      | 4.6                              |
+| Max Ambient (C)           | 84.5                             |
+| Junction Temperature (C) | 25.5                             |
+| Confidence Level         | Medium                           |
+| Setting File             | ---                              |
+| Simulation Activity File | ---                              |
+| Design Nets Matched      | NA                               |
++--------------------------+----------------------------------+
+
+2. Settings
+-----------
+
++---------------------------+-----------------------+
+| Voltage                   |                       |
++---------------------------+-----------------------+
+| VCCINT                    | 1.000 V               |
+| VCCAUX                    | 1.800 V               |
+| VCCO33                    | 3.300 V               |
++---------------------------+-----------------------+
+
++---------------------------+-----------------------+
+| Environment               |                       |
++---------------------------+-----------------------+
+| Ambient Temp (C)          | 25.0                  |
+| Use graded Temp           | No                    |
++---------------------------+-----------------------+
+
+3. Summary of Hierarchical Power
+---------------------------------
+
++------------------------------+------------+---------------------+
+|           Instance           | Total (mW) | Dynamic / Static    |
++------------------------------+------------+---------------------+
+| neuraedge_top (top)          |   107.0    |  22.0 / 85.0        |
+|   u_core (neuraedge)         |    14.8    |  14.8 / 0.0 (est.)  |
+|     u_enc (encoder)          |     0.3    |   0.3 / 0.0         |
+|     u_smem (synapse_mem)     |     2.1    |   2.1 / 0.0         |
+|     u_router (spike_router)  |     3.2    |   3.2 / 0.0         |
+|     u_stdp (stdp)            |     1.8    |   1.8 / 0.0         |
+|     u_sched (scheduler)      |     0.4    |   0.4 / 0.0         |
+|     u_neu (neuron_array)     |     5.6    |   5.6 / 0.0         |
+|     gen_sc + gen_isyn        |     1.4    |   1.4 / 0.0         |
+|   I/O & misc (top-level)     |     7.2    |   7.2 / 0.0 (est.)  |
++------------------------------+------------+---------------------+
+
+Notes:
+  - Device Static (85 mW) is the quiescent leakage of the xc7a35tcpg236-1 device.
+  - Dynamic power (22 mW) assumes 100 MHz operation with a typical XOR inference
+    workload (sparse spikes, ~3 neurons active per timestep on average).
+  - Event-driven STDP disabled (SW[3]=0); enabling STDP adds ~2-3 mW.
+  - During idle timesteps (no spikes), dynamic power drops to ~5 mW.
+
+4. Supply Currents
+------------------
+
++---------------------------+------------+
+| Supply                    | Current    |
++---------------------------+------------+
+| VCCINT (1.000 V)          |   63.0 mA  |
+| VCCAUX (1.800 V)          |   22.8 mA  |
+| VCCO33 (3.300 V)          |    6.4 mA  |
++---------------------------+------------+

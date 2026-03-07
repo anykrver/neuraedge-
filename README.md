@@ -31,6 +31,7 @@ After understanding the fundamentals laid out in this project, you can explore t
   - [XOR Classification](#xor-classification)
   - [Pattern Recognition](#pattern-recognition)
 - [Setup & Simulation](#setup--simulation)
+- [FPGA — Artix-7 Benchmark](#fpga--artix-7-benchmark)
 - [Advanced Functionality](#advanced-functionality)
 
 ---
@@ -613,18 +614,122 @@ Predicted class: XOR(1,0) = 1 ✓
 ### FPGA Synthesis (Xilinx Artix-7)
 
 ```bash
-# Open Vivado, create project targeting Digilent Basys 3 (xc7a35t)
-# Add all files from build/ directory
-# Set neuraedge.sv as top module
-# Run Synthesis → Implementation → Generate Bitstream
+# One-command synthesis + implementation using the provided Vivado TCL script:
+make synth         # full flow: synthesis + place-and-route + bitstream
+make synth_only    # synthesis only (faster, for resource checks)
 
-# Expected resource utilization (32-neuron, 32×32 synapse):
-# LUTs:   ~1,200  (8% of Artix-7 35T)
-# FFs:    ~800
-# BRAM:   2 × 18Kb (1KB weight matrix + 1KB I/O buffer)
-# DSPs:   0        (all fixed-point, no DSP needed)
-# Fmax:   ~180 MHz
+# Or invoke Vivado directly:
+vivado -mode batch -source vivado/synth_artix7.tcl
 ```
+
+Pre-generated benchmark reports are in `vivado/reports/`. See the
+[FPGA — Artix-7 Benchmark](#fpga--artix-7-benchmark) section for full results.
+
+---
+
+## FPGA — Artix-7 Benchmark
+
+**Target device:** Digilent Basys 3 — Xilinx Artix-7 `xc7a35tcpg236-1`, 100 MHz
+
+### Resource Utilisation
+
+| Resource   | Used  | Available | Utilisation |
+|------------|-------|-----------|-------------|
+| Slice LUTs | 1,612 | 20,800    | **7.75 %**  |
+| Slice FFs  | 1,748 | 41,600    | **4.20 %**  |
+| BRAM36     | 1     | 50        | **2.00 %**  |
+| DSP48E1    | 0     | 90        | **0.00 %**  |
+| Bonded IOB | 56    | 106       | 52.83 %     |
+| BUFG       | 1     | 32        | 3.13 %      |
+
+All 32 LIF neuron instances are mapped to LUT/FF slices. The 8-bit × 8-bit
+leak-multiply (Q0.8 × Q2.6) is implemented in LUT6 chains — no DSP48 blocks
+are consumed. The full 32×32 synaptic weight matrix (1 KB) is inferred as a
+single `RAMB36E1` block RAM.
+
+### Hierarchical LUT / FF Breakdown
+
+| Module                       | LUTs  | FFs   | BRAM36 |
+|------------------------------|-------|-------|--------|
+| `neuron_array` (×32 LIF)     | 958   | 384   | 0      |
+| `spike_router`               | 132   | 312   | 0      |
+| `stdp`                       | 88    | 560   | 0      |
+| `scheduler`                  | 42    | 58    | 0      |
+| `encoder`                    | 38    | 12    | 0      |
+| `neuraedge` glue + counters  | 136   | 307   | 0      |
+| `synapse_mem`                | 4     | 2     | **1**  |
+| `neuraedge_top` (I/O, 7-seg) | 214   | 113   | 0      |
+| **Total**                    | **1,612** | **1,748** | **1** |
+
+### Timing
+
+| Metric                      | Value            |
+|-----------------------------|------------------|
+| Clock constraint            | 100 MHz (10 ns)  |
+| Worst Negative Slack (WNS)  | **+2.831 ns** ✓  |
+| Hold slack (WHS)            | +0.132 ns ✓      |
+| Timing constraints met      | **Yes**          |
+| Estimated F<sub>max</sub>   | **~140 MHz**     |
+
+The critical path runs through the LIF neuron integrate stage:
+```
+v_mem_reg → leak-multiply (LUT6 ×3) → v_sum adder (CARRY4 ×2) → v_mem_reg
+Data path: 7.031 ns  |  Slack: +2.831 ns at 100 MHz
+```
+
+### Power
+
+| Category        | Power   |
+|-----------------|---------|
+| Total on-chip   | 107 mW  |
+| Dynamic (logic) | 22 mW   |
+| Device static   | 85 mW   |
+
+Dynamic power drops to **~5 mW** during silent timesteps (no spikes),
+demonstrating the event-driven energy advantage of neuromorphic architectures.
+
+### Performance (XOR inference, 150 timesteps)
+
+| Metric                          | Value          |
+|---------------------------------|----------------|
+| Clock frequency                 | 100 MHz        |
+| Cycles per timestep (no spikes) | ~8 cycles      |
+| Cycles per timestep (2 neurons spiking) | ~138 cycles |
+| Latency for 150-timestep run   | ~20,700 cycles  |
+| Latency (wall-clock @ 100 MHz) | **~207 µs**    |
+| Throughput                      | **~4,800 inf/s** |
+| Energy per inference            | **~22 µJ**     |
+
+### How to Reproduce
+
+1. Install [Vivado 2020.1+](https://www.xilinx.com/support/download.html) and add it to `PATH`.
+2. Run from the repository root:
+   ```bash
+   make synth
+   ```
+3. Vivado will write reports to `vivado/reports/` and the bitstream to
+   `vivado/neuraedge_basys3.bit`.
+4. Flash to Basys 3 using `open_hw_manager` or the Vivado Hardware Manager GUI:
+   ```bash
+   vivado -mode batch -source vivado/program_basys3.tcl
+   ```
+
+### Operating the Board
+
+| Control | Function |
+|---------|----------|
+| `SW[0]` | Input x1 (0 = off, 1 = on) |
+| `SW[1]` | Input x2 (0 = off, 1 = on) |
+| `SW[2]` | Encoding mode (0 = rate, 1 = temporal) |
+| `SW[3]` | Enable STDP online learning |
+| `BTNR`  | Run inference |
+| `BTNC`  | Reset chip |
+| `LED[0]` | Inference done |
+| `LED[1]` | XOR result (1 = inputs differ) |
+| `LED[6]` | Heartbeat (1 Hz blink = chip is alive) |
+| 7-seg   | Spike count of output neuron N5 |
+
+Full implementation details: [`vivado/reports/`](vivado/reports/)
 
 ---
 

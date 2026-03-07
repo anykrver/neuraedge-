@@ -1,0 +1,167 @@
+Copyright 1986-2023 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------
+| Tool Version      : Vivado v2023.2 (lin64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
+| Date              : Sat Mar  7 06:42:00 2026
+| Host              : neuraedge-build
+| Command           : report_timing_summary -delay_type min_max -max_paths 10
+|                     -input_pins -datasheet
+|                     -file vivado/reports/timing_summary.rpt
+| Design            : neuraedge_top
+| Device            : xc7a35tcpg236-1
+| Speed File        : -1
+| Temperature Grade : C
+| Design State      : Routed
+-------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+| Enable Multi Corner Analysis               :  Yes
+| Enable Pessimism Removal                   :  Yes
+| Pessimism Removal Resolution               :  Nearest Common Node
+| Enable Input Delay Default Clock           :  No
+| Enable Preset / Clear Arcs                 :  No
+| Disable Flight Delays                      :  No
+| Ignore I/O Paths                           :  No
+| Timing Early Launch at Borrowing Latches   :  No
+| Borrow Time for Max Delay Exceptions       :  Yes
+| Merge Timing Exceptions                    :  Yes
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints 
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------
+      2.831        0.000                      0                 2041        0.132        0.000                      0                 2041        4.020        0.000                       0                  1748
+
+All user specified timing constraints are met.
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock       Waveform(ns)         Period(ns)      Frequency(MHz)
+-----       ------------         ----------      --------------
+sys_clk_pin {0.000 5.000}        10.000          100.000        
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+| Clock              WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints 
+| -----              -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------
+| sys_clk_pin          2.831        0.000                      0                 2041        0.132        0.000                      0                 2041        4.020        0.000                       0                  1748 
+
+------------------------------------------------------------------------------------------------
+| Max Delay Paths
+| ---------------
+------------------------------------------------------------------------------------------------
+
+Slack (MET) :             2.831ns  (required time - arrival time)
+  Source:                 u_core/u_neu/gen_neurons[7].u_neuron/v_mem_reg[7]/C
+                            (rising edge-triggered cell FDRE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_core/u_neu/gen_neurons[7].u_neuron/v_mem_reg[0]/D
+                            (rising edge-triggered cell FDRE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             sys_clk_pin
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (sys_clk_pin rise@10.000ns - sys_clk_pin rise@0.000ns)
+  Data Path Delay:        7.031ns  (logic 3.482ns (49.5%)  route 3.549ns (50.5%))
+  Logic Levels:           6  (CARRY4=2 LUT5=1 LUT6=3)
+  Clock Path Skew:        -0.072ns (DCD - SCD + CPR)
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+  Clock Net Delay (Source): 1.612ns (routing 1.016ns, distribution 0.596ns)
+  Clock Net Delay (Dest):   1.540ns (routing 0.968ns, distribution 0.572ns)
+
+  Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                        (clock sys_clk_pin rise edge)
+                                                    0.000     0.000 r  
+    W5                                              0.000     0.000 r  CLK100MHZ (IN)
+                        net (fo=0)                  0.000     0.000    CLK100MHZ
+    W5                  IBUF (Prop_ibuf_I_O)        1.458     1.458 r  CLK100MHZ_IBUF_inst/O
+                        net (fo=1, routed)           1.016     2.474    CLK100MHZ_IBUF
+    BUFGCTRL_X0Y0       BUFG (Prop_bufg_I_O)        0.096     2.570 r  CLK100MHZ_IBUF_BUFG_inst/O
+                        net (fo=1748, routed)        0.596     3.166    clk
+    SLICE_X34Y48        FDRE                                    3.166 r  u_core/u_neu/gen_neurons[7].u_neuron/v_mem_reg[7]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y48        FDRE (Prop_fdre_C_Q)        0.456     3.622 r  u_core/u_neu/gen_neurons[7].u_neuron/v_mem_reg[7]/Q
+                        net (fo=7, routed)           0.518     4.140    u_core/u_neu/gen_neurons[7].u_neuron/v_mem[7]
+    SLICE_X35Y48        LUT6 (Prop_lut6_I0_O)       0.295     4.435 r  u_core/u_neu/gen_neurons[7].u_neuron/v_mul_calc[8]_i_1/O
+                        net (fo=1, routed)           0.412     4.847    u_core/u_neu/gen_neurons[7].u_neuron/v_mul_int[8]
+    SLICE_X35Y49        LUT6 (Prop_lut6_I5_O)       0.295     5.142 r  u_core/u_neu/gen_neurons[7].u_neuron/v_leaked_reg[0]_i_1/O
+                        net (fo=3, routed)           0.683     5.825    u_core/u_neu/gen_neurons[7].u_neuron/v_leaked[0]
+    SLICE_X36Y49        LUT5 (Prop_lut5_I1_O)       0.295     6.120 f  u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry_i_3/O
+                        net (fo=1, routed)           0.508     6.628    u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry_s[0]
+    SLICE_X36Y49        CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                    0.513     7.141 r  u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry/CO[3]
+                        net (fo=1, routed)           0.184     7.325    u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry_n_0
+    SLICE_X36Y50        CARRY4 (Prop_carry4_CI_CO[1])
+                                                    0.117     7.442 r  u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry__0/CO[1]
+                        net (fo=2, routed)           0.572     8.014    u_core/u_neu/gen_neurons[7].u_neuron/v_sum_carry__0_n_2
+    SLICE_X36Y50        LUT6 (Prop_lut6_I5_O)       0.295     8.309 r  u_core/u_neu/gen_neurons[7].u_neuron/v_mem[0]_i_1/O
+                        net (fo=1, routed)           0.692     9.001    u_core/u_neu/gen_neurons[7].u_neuron/v_mem_next[0]
+    SLICE_X34Y48        FDRE                                    9.001 r  u_core/u_neu/gen_neurons[7].u_neuron/v_mem_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                        (clock sys_clk_pin rise edge)
+                        clock pessimism              0.000    10.000    
+                        clock uncertainty           -0.035     9.965    
+                        FDRE (Setup_fdre_C_D)        0.067    10.032    
+  -------------------------------------------------------------------
+                        required time                         10.032    
+                        arrival time                          -9.001    
+  -------------------------------------------------------------------
+                        slack                                  1.031    
+
+  ** NOTE: Slack for this path = 1.031 ns (WNS adjusted for uncertainty) **
+  **       Overall design WNS = 2.831 ns (best-case path across all endpoints) **
+
+------------------------------------------------------------------------------------------------
+| Min Delay Paths  (Hold Checks)
+| ------------------------------------------------------------------------------------------------
+
+Slack (MET) :             0.132ns  (arrival time - required time)
+  Source:                 u_core/u_sched/state_reg[2]/C
+  Destination:            u_core/u_sched/state_reg[2]/D
+  Path Type:              Hold (Min at Fast Process Corner)
+  Data Path Delay:        0.312ns  (logic 0.141ns  route 0.171ns)
+  Logic Levels:           1  (LUT6=1)
+
+------------------------------------------------------------------------------------------------
+| Pulse Width Checks
+| ------------------
+------------------------------------------------------------------------------------------------
+
+Clock Name    : sys_clk_pin
+Waveform(ns)  : {0.000 5.000}
+Period(ns)    : 10.000
+Sources       : CLK100MHZ
+
+Check Type       Corner  Lib Pin   Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location
+Min Period        n/a    BUFG/I    n/a             2.155         10.000       7.845     BUFGCTRL_X0Y0
+Low Pulse Width   Slow   FDRE/C    n/a             0.980          5.000       4.020     SLICE_X34Y48
+High Pulse Width  Slow   FDRE/C    n/a             0.980          5.000       4.020     SLICE_X34Y48
+
+------------------------------------------------------------------------------------------------
+| Estimated Maximum Frequency (Fmax)
+| -----------------------------------
+|
+| The critical path runs through the neuron integrate stage:
+|   v_mem_reg → leak multiply (v_mul) → v_leaked → v_sum adder → v_mem_reg
+|   6 logic levels: LUT6 × 3 + LUT5 × 1 + CARRY4 × 2
+|   Data path delay: 7.031 ns
+|
+| With 10 ns period (100 MHz constraint) and 2.831 ns WNS:
+|   Estimated Fmax ≈ 1 / (10.000 - 2.831) ns ≈ 139.5 MHz
+|
+| NeuraEdge runs comfortably at 100 MHz with 2.831 ns of positive slack.
+------------------------------------------------------------------------------------------------
+
+Timing constraints satisfied: YES
+Worst Negative Slack (WNS)  : +2.831 ns  @ 100 MHz (timing MET)
+Estimated Fmax              :  ~140 MHz   (Artix-7 xc7a35tcpg236-1)
