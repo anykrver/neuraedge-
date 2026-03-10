@@ -23,8 +23,8 @@ module neuraedge_top (
     localparam DEBOUNCE_CYCLES = 1_000_000;
     localparam DB_W = 20;
 
-    logic [DB_W-1:0] db_cnt_c, db_cnt_r;
-    logic db_btnc_d, db_btnr_d;
+    logic [DB_W-1:0] db_cnt_c = '0, db_cnt_r = '0;
+    logic db_btnc_d = 1'b0, db_btnr_d = 1'b0;
 
     // Debounce BTNC (reset)
     always_ff @(posedge clk) begin

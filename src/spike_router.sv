@@ -91,7 +91,7 @@ module spike_router #(
                     // mem_rdata valid for (src_id, dst_id)
                     i_syn_out[dst_id] <= $signed(i_syn_out[dst_id]) +
                                          $signed(mem_rdata);
-                    if (dst_id == 5'd31) begin
+                    if (dst_id == 5'(N_NEURONS-1)) begin
                         pending[src_id] <= 1'b0;
                         state           <= ARBITRATE;
                     end else begin
