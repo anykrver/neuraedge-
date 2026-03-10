@@ -166,7 +166,8 @@ module neuraedge_mnist #(
                 else if (cfg_run)
                     out_spike_count[sc] <= {DATA_W{1'b0}};
                 else if (spike_vector[sc])
-                    out_spike_count[sc] <= out_spike_count[sc] + 8'd1;
+                    out_spike_count[sc] <= (out_spike_count[sc] == {DATA_W{1'b1}}) ?
+                                           {DATA_W{1'b1}} : out_spike_count[sc] + 8'd1;
             end
         end
     endgenerate

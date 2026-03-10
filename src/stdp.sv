@@ -105,26 +105,23 @@ module stdp #(
                 end
 
                 S_SCAN: begin
-                    // Check if we've processed all pairs
-                    if (pre_idx == 5'd31 &&
-                        post_idx == 5'd31) begin
+                    // Only do read-modify-write if at least one neuron fired
+                    if ((t_spike[pre_idx]  != 16'hFFFF) ||
+                        (t_spike[post_idx] != 16'hFFFF)) begin
+                        mem_addr <= {pre_idx, post_idx};
+                        state    <= S_READ;
+                        // (indices advanced after S_WRITE returns)
+                    end else if (pre_idx == 5'(N_NEURONS-1) && post_idx == 5'(N_NEURONS-1)) begin
+                        // Last pair, no update needed
                         state <= S_DONE;
                     end else begin
-                        // Advance to next pair
-                        if (post_idx == 5'd31) begin
+                        // Advance to next pair (skip — no spikes on current pair)
+                        if (post_idx == 5'(N_NEURONS-1)) begin
                             pre_idx  <= pre_idx + 5'd1;
                             post_idx <= 5'd0;
                         end else begin
                             post_idx <= post_idx + 5'd1;
                         end
-
-                        // Only do read-modify-write if at least one neuron fired
-                        if ((t_spike[pre_idx]  != 16'hFFFF) ||
-                            (t_spike[post_idx] != 16'hFFFF)) begin
-                            mem_addr <= {pre_idx, post_idx};
-                            state    <= S_READ;
-                        end
-                        // else stay in S_SCAN (skip this pair)
                     end
                 end
 
@@ -171,7 +168,18 @@ module stdp #(
                             mem_wdata <= w_new_wide[DATA_W-1:0];
                         mem_wr_en <= 1'b1;
                     end
-                    state <= S_SCAN;
+                    // Advance to next pair; terminate after the last one
+                    if (pre_idx == 5'(N_NEURONS-1) && post_idx == 5'(N_NEURONS-1)) begin
+                        state <= S_DONE;
+                    end else begin
+                        if (post_idx == 5'(N_NEURONS-1)) begin
+                            pre_idx  <= pre_idx + 5'd1;
+                            post_idx <= 5'd0;
+                        end else begin
+                            post_idx <= post_idx + 5'd1;
+                        end
+                        state <= S_SCAN;
+                    end
                 end
 
                 S_DONE: begin
