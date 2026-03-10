@@ -151,7 +151,7 @@ module neuraedge_top (
     // ---- Core instantiation ----
     logic        out_done;
     logic [15:0] out_timestep;
-    logic [7:0]  out_spike_count [0:31];
+   logic [31:0][7:0] out_spike_count;
     logic [31:0] out_spike_vector;
 
     neuraedge #(.N_NEURONS(32), .N_INPUTS(2)) u_core (
