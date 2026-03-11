@@ -721,6 +721,19 @@ Then re-run `make sim_mnist` to verify inference end-to-end.
 #   LED[6] = heartbeat (1 Hz)  7-seg  = spike count
 ```
 
+### Synthesis Results (32-neuron `neuraedge_top`, Artix-7 xc7a35t @ 100 MHz)
+
+Post-implementation results from Vivado after the type-mismatch fix:
+
+| Resource   | Used  | Available | Utilisation |
+|------------|-------|-----------|-------------|
+| LUTs       | 2,166 | 20,800    | 10.4%       |
+| FFs        | 1,466 | 41,600    | 3.5%        |
+| BRAM (18K) | 1     | 100       | 1.0%        |
+| DSPs       | 0     | 90        | 0%          |
+
+**Timing:** WNS = +1.181 ns at 100 MHz. Critical path is in the STDP weight update (10 logic levels, `t_spike_reg` through `CARRY4` to `mem_wdata_reg`). Well within margin.
+
 ---
 
 ## Advanced Functionality
