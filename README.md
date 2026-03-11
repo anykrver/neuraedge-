@@ -106,35 +106,7 @@ neuraedge/
 
 The 128-neuron MNIST configuration (`neuraedge_mnist.sv`):
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         NeuraEdge Chip                          │
-│                                                                 │
-│  ┌──────────┐    ┌─────────────────────────────────────────┐   │
-│  │  Spike   │    │             Neuron Array                 │   │
-│  │ Encoder  │───▶│  [N0] [N1] [N2] ... [N127]              │   │
-│  └──────────┘    │   LIF  LIF  LIF        LIF              │   │
-│                  └──────────────┬───────────────────────────┘   │
-│                                 │ Spike Events (AER)            │
-│                  ┌──────────────▼──────────────────────────┐   │
-│                  │           Spike Router                   │   │
-│                  │   4-stage pipeline, 1 spike / 4 cycles   │   │
-│                  └──────────────┬──────────────────────────┘   │
-│                                 │                               │
-│            ┌────────────────────┤                               │
-│            │                   │                               │
-│  ┌─────────▼──────┐  ┌─────────▼──────┐                       │
-│  │  Synaptic Mem  │  │  STDP Engine   │                       │
-│  │  4-bank BRAM   │  │  Δw = f(Δt)   │                       │
-│  │ 128×128 × 8b   │  └────────────────┘                       │
-│  └────────────────┘                                            │
-│                                                                 │
-│  ┌──────────┐    ┌────────────────┐                            │
-│  │ Argmax   │◀───│   Scheduler    │                            │
-│  │ Decoder  │    │ event dispatch │                            │
-│  └──────────┘    └────────────────┘                            │
-└─────────────────────────────────────────────────────────────────┘
-```
+![NeuraEdge top-level architecture](docs/images/architecture.jpeg)
 
 The 32-neuron XOR baseline (`neuraedge.sv`) uses the same pipeline with a single-bank 32×32 BRAM and a simpler 4-state router FSM.
 
