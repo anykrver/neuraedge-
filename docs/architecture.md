@@ -10,7 +10,7 @@ NeuraEdge is a mesh-based spiking neural network accelerator with online trace-b
 
 Primary pipeline:
 
-![NeuraEdge top-level architecture](Top_level_architecture.svg)
+![NeuraEdge top-level architecture](neuraedge-architecture.svg)
 
 ---
 

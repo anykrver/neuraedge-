@@ -68,7 +68,7 @@ NeuraEdge v2 addresses all three. The design is small enough to understand compl
 
 ### System overview
 
-![NeuraEdge top-level architecture](docs/Top_level_architecture.svg)
+![NeuraEdge top-level architecture](docs/neuraedge-architecture.svg)
 
 ### LIF neuron core
 
