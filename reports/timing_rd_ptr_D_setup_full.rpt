@@ -1,0 +1,88 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Mon Mar 23 00:03:50 2026
+| Host         : RAHUL-VERMA running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -to {gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/D} -max_paths 1 -path_type full_clock_expanded -file {sim\timing_rd_ptr_D_setup_full.rpt}
+| Design       : neuraedge_top
+| Device       : 7a100t-csg324
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+| Design State : Routed
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             1.112ns  (required time - arrival time)
+  Source:                 gen_col[0].gen_row[1].u_router/rd_ptr_reg[4][2]/C
+                            (rising edge-triggered cell FDRE clocked by sys_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/D
+                            (rising edge-triggered cell FDRE clocked by sys_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             sys_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (sys_clk rise@10.000ns - sys_clk rise@0.000ns)
+  Data Path Delay:        8.889ns  (logic 1.938ns (21.802%)  route 6.951ns (78.198%))
+  Logic Levels:           9  (LUT3=2 LUT5=2 LUT6=5)
+  Clock Path Skew:        -0.044ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    4.933ns = ( 14.933 - 10.000 ) 
+    Source Clock Delay      (SCD):    5.236ns
+    Clock Pessimism Removal (CPR):    0.259ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock sys_clk rise edge)    0.000     0.000 r  
+    E3                                                0.000     0.000 r  clk (IN)
+                         net (fo=0)                   0.000     0.000    clk
+    E3                   IBUF (Prop_ibuf_I_O)         1.482     1.482 r  clk_IBUF_inst/O
+                         net (fo=1, routed)           2.025     3.506    clk_IBUF
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.096     3.602 r  clk_IBUF_BUFG_inst/O
+                         net (fo=8697, routed)        1.633     5.236    gen_col[0].gen_row[1].u_router/clk_IBUF_BUFG
+    SLICE_X63Y52         FDRE                                         r  gen_col[0].gen_row[1].u_router/rd_ptr_reg[4][2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X63Y52         FDRE (Prop_fdre_C_Q)         0.419     5.655 f  gen_col[0].gen_row[1].u_router/rd_ptr_reg[4][2]/Q
+                         net (fo=2, routed)           0.808     6.463    gen_col[0].gen_row[1].u_router/p_0_in
+    SLICE_X62Y52         LUT3 (Prop_lut3_I0_O)        0.299     6.762 r  gen_col[0].gen_row[1].u_router/rr_ptr[2][0]_i_17/O
+                         net (fo=12, routed)          0.967     7.728    gen_col[0].gen_row[1].u_router/rr_ptr[2][0]_i_17_n_0
+    SLICE_X61Y50         LUT6 (Prop_lut6_I1_O)        0.124     7.852 r  gen_col[0].gen_row[1].u_router/rr_ptr[4][0]_i_8/O
+                         net (fo=4, routed)           0.786     8.638    gen_col[0].gen_row[1].u_router/rr_ptr[4][0]_i_8_n_0
+    SLICE_X61Y50         LUT3 (Prop_lut3_I1_O)        0.150     8.788 r  gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_9/O
+                         net (fo=2, routed)           0.751     9.540    gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_9_n_0
+    SLICE_X59Y51         LUT6 (Prop_lut6_I1_O)        0.326     9.866 r  gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_5/O
+                         net (fo=1, routed)           0.404    10.270    gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_5_n_0
+    SLICE_X59Y50         LUT6 (Prop_lut6_I1_O)        0.124    10.394 r  gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_3/O
+                         net (fo=10, routed)          1.087    11.481    gen_col[0].gen_row[1].u_router/rr_ptr[4][2]_i_3_n_0
+    SLICE_X58Y52         LUT5 (Prop_lut5_I1_O)        0.124    11.605 r  gen_col[0].gen_row[1].u_router/rd_ptr[2][2]_i_18/O
+                         net (fo=3, routed)           0.627    12.232    gen_col[0].gen_row[1].u_router/rd_ptr[2][2]_i_18_n_0
+    SLICE_X58Y50         LUT5 (Prop_lut5_I4_O)        0.124    12.356 f  gen_col[0].gen_row[1].u_router/rd_ptr[2][2]_i_9/O
+                         net (fo=1, routed)           0.670    13.026    gen_col[0].gen_row[1].u_router/rd_ptr[2][2]_i_9_n_0
+    SLICE_X58Y50         LUT6 (Prop_lut6_I1_O)        0.124    13.150 r  gen_col[0].gen_row[1].u_router/rd_ptr[2][2]_i_5__0/O
+                         net (fo=40, routed)          0.851    14.001    gen_col[0].gen_row[1].u_router/out_valid_r11_out
+    SLICE_X58Y52         LUT6 (Prop_lut6_I1_O)        0.124    14.125 r  gen_col[0].gen_row[1].u_router/rd_ptr[1][1]_i_1__0/O
+                         net (fo=1, routed)           0.000    14.125    gen_col[0].gen_row[1].u_router/rd_ptr[1][1]_i_1__0_n_0
+    SLICE_X58Y52         FDRE                                         r  gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock sys_clk rise edge)   10.000    10.000 r  
+    E3                                                0.000    10.000 r  clk (IN)
+                         net (fo=0)                   0.000    10.000    clk
+    E3                   IBUF (Prop_ibuf_I_O)         1.411    11.411 r  clk_IBUF_inst/O
+                         net (fo=1, routed)           1.920    13.331    clk_IBUF
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    13.422 r  clk_IBUF_BUFG_inst/O
+                         net (fo=8697, routed)        1.510    14.933    gen_col[0].gen_row[1].u_router/clk_IBUF_BUFG
+    SLICE_X58Y52         FDRE                                         r  gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/C
+                         clock pessimism              0.259    15.192    
+                         clock uncertainty           -0.035    15.156    
+    SLICE_X58Y52         FDRE (Setup_fdre_C_D)        0.081    15.237    gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]
+  -------------------------------------------------------------------
+                         required time                         15.237    
+                         arrival time                         -14.125    
+  -------------------------------------------------------------------
+                         slack                                  1.112    
+
+
+
+

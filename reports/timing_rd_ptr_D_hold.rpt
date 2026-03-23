@@ -1,0 +1,22 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Mon Mar 23 00:03:50 2026
+| Host         : RAHUL-VERMA running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type min -to {gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/D} -max_paths 10 -path_type summary -file {sim\timing_rd_ptr_D_hold.rpt}
+| Design       : neuraedge_top
+| Device       : 7a100t-csg324
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+| Design State : Routed
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Startpoint                     Endpoint                       Slack(ns)     
+----------------------------------------------------------------------------
+gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/C
+                               gen_col[0].gen_row[1].u_router/rd_ptr_reg[1][1]/D
+                                                              0.347         
+
+
+
