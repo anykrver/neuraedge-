@@ -1,0 +1,59 @@
+# ==============================================================================
+# .gitignore — NeuraEdge
+# ==============================================================================
+
+# --- Vivado / Xilinx ----------------------------------------------------------
+vivado_proj*/
+.Xil/
+*.jou
+*.log
+*.pb
+*.str
+*.backup.jou
+*.backup.log
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.srcs/
+xelab.log
+xelab.pb
+xsim.log
+xsim.jou
+xvlog.log
+xvlog.pb
+*.wdb
+
+# --- Simulation artefacts -----------------------------------------------------
+obj_dir_*/
+sim/*.vcd
+sim/*.log
+sim/*_iv
+sim/spike_router_iv_post
+xsim.dir/
+
+# --- Generated reports (keep reference copies committed; ignore re-generated) --
+reports/*.log
+reports/*.jou
+
+# --- Python -------------------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.venv/
+software/*.pt
+software/datasets/
+weights/
+
+# --- Build artefacts ----------------------------------------------------------
+build/
+
+# --- OS / editor --------------------------------------------------------------
+.DS_Store
+.vscode/
+*.swp
+*~

@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" font-family="Arial, Helvetica, sans-serif">
+
+  <defs>
+    <!-- Bidirectional gray arrowhead (forward) -->
+    <marker id="arr-fwd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto-start-reverse">
+      <path d="M1,1 L7,3.5 L1,6 Z" fill="#444"/>
+    </marker>
+    <!-- Blue arrowhead for packet path -->
+    <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L7,3.5 L1,6 Z" fill="#2060c0"/>
+    </marker>
+    <!-- Gray local-delivery arrowhead -->
+    <marker id="arr-local" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L7,3.5 L1,6 Z" fill="#888"/>
+    </marker>
+    <!-- AER arrow (dark) -->
+    <marker id="arr-dark" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+      <path d="M1,1 L7,3.5 L1,6 Z" fill="#111"/>
+    </marker>
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="720" height="560" fill="#fff"/>
+
+  <!-- ══════════════════════════════════════════
+       TITLE
+  ══════════════════════════════════════════ -->
+  <text x="360" y="36" text-anchor="middle" font-size="13" font-weight="bold"
+        fill="#111" letter-spacing="0.6">2×2 MESH NOC ARCHITECTURE — NEURAEDGE v2</text>
+
+  <!-- ══════════════════════════════════════════
+       ROUTER CENTERS:
+         R00 = (200, 160)   R01 = (500, 160)
+         R10 = (200, 380)   R11 = (500, 380)
+       Router box: 140 × 100  → cx±70, cy±50
+  ══════════════════════════════════════════ -->
+
+  <!-- ── Physical links (bidirectional solid gray, markers both ends) ── -->
+
+  <!-- Horizontal top: R00 right(270,160) ↔ R01 left(430,160) -->
+  <line x1="270" y1="160" x2="430" y2="160"
+        stroke="#444" stroke-width="1.5"
+        marker-start="url(#arr-fwd)" marker-end="url(#arr-fwd)"/>
+  <text x="350" y="153" text-anchor="middle" font-size="8.5" fill="#777">E / W</text>
+
+  <!-- Horizontal bottom: R10(270,380) ↔ R11(430,380) -->
+  <line x1="270" y1="380" x2="430" y2="380"
+        stroke="#444" stroke-width="1.5"
+        marker-start="url(#arr-fwd)" marker-end="url(#arr-fwd)"/>
+  <text x="350" y="373" text-anchor="middle" font-size="8.5" fill="#777">E / W</text>
+
+  <!-- Vertical left: R00 bot(200,210) ↔ R10 top(200,330) -->
+  <line x1="200" y1="210" x2="200" y2="330"
+        stroke="#444" stroke-width="1.5"
+        marker-start="url(#arr-fwd)" marker-end="url(#arr-fwd)"/>
+  <text x="213" y="274" text-anchor="start" font-size="8.5" fill="#777">N / S</text>
+
+  <!-- Vertical right: R01(500,210) ↔ R11(500,330) -->
+  <line x1="500" y1="210" x2="500" y2="330"
+        stroke="#444" stroke-width="1.5"
+        marker-start="url(#arr-fwd)" marker-end="url(#arr-fwd)"/>
+  <text x="513" y="274" text-anchor="start" font-size="8.5" fill="#777">N / S</text>
+
+  <!-- ── Local port arrows — offset left/right per router to avoid overlap ── -->
+  <!-- R00 local: exits bottom-left of R00 (x=185), goes down to y=460 -->
+  <line x1="185" y1="210" x2="185" y2="462"
+        stroke="#888" stroke-width="1" stroke-dasharray="3,2"
+        marker-end="url(#arr-local)"/>
+  <text x="161" y="476" text-anchor="middle" font-size="8" fill="#666">Cluster 0</text>
+
+  <!-- R01 local: exits bottom-left of R01 (x=485), goes down to y=460 -->
+  <line x1="485" y1="210" x2="485" y2="462"
+        stroke="#888" stroke-width="1" stroke-dasharray="3,2"
+        marker-end="url(#arr-local)"/>
+  <text x="461" y="476" text-anchor="middle" font-size="8" fill="#666">Cluster 1</text>
+
+  <!-- R10 local: exits bottom-right of R10 (x=215), goes down to y=460 -->
+  <line x1="215" y1="430" x2="215" y2="462"
+        stroke="#888" stroke-width="1" stroke-dasharray="3,2"
+        marker-end="url(#arr-local)"/>
+  <text x="241" y="476" text-anchor="middle" font-size="8" fill="#666">Cluster 2</text>
+
+  <!-- R11 local: exits bottom-right of R11 (x=515), goes down to y=460 -->
+  <line x1="515" y1="430" x2="515" y2="462"
+        stroke="#888" stroke-width="1" stroke-dasharray="3,2"
+        marker-end="url(#arr-local)"/>
+  <text x="541" y="476" text-anchor="middle" font-size="8" fill="#666">Cluster 3</text>
+
+  <!-- ── Example packet path (dashed blue): R00 → R01 → local ──
+       Offset above the gray physical link to avoid overlap (y=147 vs y=160) -->
+  <line x1="270" y1="147" x2="430" y2="147"
+        stroke="#2060c0" stroke-width="2" stroke-dasharray="6,4"
+        marker-end="url(#arr-blue)"/>
+  <!-- Vertical local-delivery from R01 right side, offset to avoid local arrow -->
+  <line x1="516" y1="210" x2="516" y2="310"
+        stroke="#2060c0" stroke-width="2" stroke-dasharray="6,4"
+        marker-end="url(#arr-blue)"/>
+
+  <!-- Route annotation -->
+  <text x="350" y="136" text-anchor="middle" font-size="8" fill="#2060c0" font-style="italic">
+    X-first routing: R00 → R01 → local
+  </text>
+  <!-- "local" label at end of blue vertical -->
+  <text x="532" y="307" text-anchor="start" font-size="8" fill="#2060c0" font-style="italic">local</text>
+
+  <!-- ── AER Input box ── -->
+  <rect x="18" y="133" width="106" height="58" fill="#f6f6f6" stroke="#333" stroke-width="1.5" rx="2"/>
+  <text x="71" y="152" text-anchor="middle" font-size="9" font-weight="bold" fill="#111">Event Encoder</text>
+  <text x="71" y="164" text-anchor="middle" font-size="8" fill="#555">AER Input</text>
+  <text x="71" y="175" text-anchor="middle" font-size="8" fill="#555">32-bit packet</text>
+
+  <!-- AER arrow → R00 left edge -->
+  <line x1="124" y1="160" x2="130" y2="160"
+        stroke="#111" stroke-width="1.5"
+        marker-end="url(#arr-dark)"/>
+
+  <!-- ── ROUTER BOXES ── -->
+
+  <!-- R00: center (200,160), box (130,110)→(270,210) -->
+  <rect x="130" y="110" width="140" height="100" fill="#fff" stroke="#111" stroke-width="1.5"/>
+  <text x="200" y="133" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#111">R00</text>
+  <text x="200" y="146" text-anchor="middle" font-size="8.5" fill="#666">(col=0, row=0)</text>
+  <line x1="148" y1="152" x2="252" y2="152" stroke="#ccc" stroke-width="0.75"/>
+  <text x="200" y="163" text-anchor="middle" font-size="8.5" fill="#333">5-Port Router</text>
+  <text x="200" y="174" text-anchor="middle" font-size="8.5" fill="#333">Credit FIFO</text>
+  <text x="200" y="185" text-anchor="middle" font-size="8.5" fill="#333">X→Y DOR</text>
+
+  <!-- R01: center (500,160) -->
+  <rect x="430" y="110" width="140" height="100" fill="#fff" stroke="#111" stroke-width="1.5"/>
+  <text x="500" y="133" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#111">R01</text>
+  <text x="500" y="146" text-anchor="middle" font-size="8.5" fill="#666">(col=1, row=0)</text>
+  <line x1="448" y1="152" x2="552" y2="152" stroke="#ccc" stroke-width="0.75"/>
+  <text x="500" y="163" text-anchor="middle" font-size="8.5" fill="#333">5-Port Router</text>
+  <text x="500" y="174" text-anchor="middle" font-size="8.5" fill="#333">Credit FIFO</text>
+  <text x="500" y="185" text-anchor="middle" font-size="8.5" fill="#333">X→Y DOR</text>
+
+  <!-- R10: center (200,380) -->
+  <rect x="130" y="330" width="140" height="100" fill="#fff" stroke="#111" stroke-width="1.5"/>
+  <text x="200" y="353" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#111">R10</text>
+  <text x="200" y="366" text-anchor="middle" font-size="8.5" fill="#666">(col=0, row=1)</text>
+  <line x1="148" y1="372" x2="252" y2="372" stroke="#ccc" stroke-width="0.75"/>
+  <text x="200" y="383" text-anchor="middle" font-size="8.5" fill="#333">5-Port Router</text>
+  <text x="200" y="394" text-anchor="middle" font-size="8.5" fill="#333">Credit FIFO</text>
+  <text x="200" y="405" text-anchor="middle" font-size="8.5" fill="#333">X→Y DOR</text>
+
+  <!-- R11: center (500,380) -->
+  <rect x="430" y="330" width="140" height="100" fill="#fff" stroke="#111" stroke-width="1.5"/>
+  <text x="500" y="353" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#111">R11</text>
+  <text x="500" y="366" text-anchor="middle" font-size="8.5" fill="#666">(col=1, row=1)</text>
+  <line x1="448" y1="372" x2="552" y2="372" stroke="#ccc" stroke-width="0.75"/>
+  <text x="500" y="383" text-anchor="middle" font-size="8.5" fill="#333">5-Port Router</text>
+  <text x="500" y="394" text-anchor="middle" font-size="8.5" fill="#333">Credit FIFO</text>
+  <text x="500" y="405" text-anchor="middle" font-size="8.5" fill="#333">X→Y DOR</text>
+
+  <!-- ══════════════════════════════════════════
+       LEGEND (top-right)
+  ══════════════════════════════════════════ -->
+  <rect x="594" y="60" width="112" height="80" fill="#fff" stroke="#bbb" stroke-width="1" rx="2"/>
+  <text x="606" y="77" font-size="8.5" font-weight="bold" fill="#111" letter-spacing="0.5">LEGEND</text>
+  <line x1="606" y1="80" x2="700" y2="80" stroke="#ddd" stroke-width="0.75"/>
+
+  <!-- Physical link row -->
+  <line x1="606" y1="92" x2="638" y2="92" stroke="#444" stroke-width="1.5"
+        marker-start="url(#arr-fwd)" marker-end="url(#arr-fwd)"/>
+  <text x="644" y="96" font-size="8" fill="#333">Physical link</text>
+
+  <!-- Packet route row -->
+  <line x1="606" y1="108" x2="638" y2="108" stroke="#2060c0" stroke-width="2"
+        stroke-dasharray="5,3" marker-end="url(#arr-blue)"/>
+  <text x="644" y="112" font-size="8" fill="#333">Packet route</text>
+
+  <!-- Local delivery row -->
+  <line x1="606" y1="124" x2="638" y2="124" stroke="#888" stroke-width="1"
+        stroke-dasharray="3,2" marker-end="url(#arr-local)"/>
+  <text x="644" y="128" font-size="8" fill="#333">Local delivery</text>
+
+</svg>

@@ -1,0 +1,21 @@
+# NeuraEdge Python requirements
+# Install with: pip install -r software/requirements.txt
+
+# Core SNN framework
+torch>=2.0.0
+snntorch>=0.9.0
+
+# Neuromorphic dataset loader (N-MNIST, DVS Gesture, etc.)
+tonic>=2.0.0
+
+# Numerical computing
+numpy>=1.24.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Plotting (optional — used in analysis notebooks)
+matplotlib>=3.7.0
+
+# Data handling
+pandas>=2.0.0
