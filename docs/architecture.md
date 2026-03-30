@@ -1,6 +1,6 @@
 # NeuraEdge Architecture
 
-Module responsibilities, parameters, and external interfaces for NeuraEdge v2.5.0.
+Module responsibilities, parameters, and external interfaces for NeuraEdge v2.1.0.
 
 ---
 
@@ -138,7 +138,7 @@ Post-route, Vivado 2024.x, `xc7a100tcsg324-1`, 100 MHz:
 
 | Metric | Value |
 |--------|-------|
-| WNS | +0.112 ns |
+| WNS | +0.248 ns |
 | TNS | 0.000 ns |
 | WHS | +0.050 ns |
 | THS | 0.000 ns |
