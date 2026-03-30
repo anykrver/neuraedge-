@@ -41,35 +41,7 @@ All RTL modules (`neuraedge_top.sv`, `neuron_core.sv`, `spike_router.sv`, `synap
 ## Architecture Summary
 
 ```
-DVS Event Stream
-      │
-  ┌───▼──────────────┐
-  │  event_encoder   │  Maps (x,y,pol,ts) → AER packet → cluster address
-  └───┬──────────────┘
-      │ AER packet
-  ┌───▼──────────────────────────────────────┐
-  │         2×2 Credit-Based Mesh NoC        │
-  │  ┌──────────┐  ┌──────────┐             │
-  │  │ Cluster  │  │ Cluster  │  X-then-Y   │
-  │  │ (0,0)    │  │ (1,0)    │  DOR        │
-  │  ├──────────┤  ├──────────┤             │
-  │  │ Cluster  │  │ Cluster  │             │
-  │  │ (0,1)    │  │ (1,1)    │             │
-  │  └──────────┘  └──────────┘             │
-  └───┬──────────────────────────────────────┘
-      │ spike_out[4 clusters][64 neurons]
-  ┌───▼──────────────┐
-  │ Output Classifier│  Iterative argmax → UART → LED
-  └──────────────────┘
-
-Per-Cluster Pipeline:
-  spike_router → neuron_core → (spike_out)
-                     ↑               ↓
-              synapse_memory ← learning_engine
-```
-
-Each cluster instantiates: `spike_router` → `neuron_core` → `synapse_memory` ↔ `learning_engine`. See [`docs/architecture.md`](docs/architecture.md) for the full internal design specification.
-
+https://github.com/anykrver/neuraedge-/blob/main/docs/neuraedge-architecture.svg
 ---
 
 ## Implementation Results
@@ -238,19 +210,6 @@ The RTL uses no FPGA primitives in the design proper. It passes Yosys synthesis 
 | End-to-end N-MNIST demo: SPI load → DVS input → UART result | ☐ Planned |
 | 4×4 mesh expansion (1,024 neurons, 128 KB synapse memory) | ☐ Planned |
 | OpenLane / SKY130 synthesis pass | ✅ Done |
-
----
-
-## Documentation Index
-
-| Document | Contents |
-|----------|----------|
-| [docs/architecture.md](docs/architecture.md) | Block diagrams, pipeline, memory hierarchy, timing analysis |
-| [docs/scaling.md](docs/scaling.md) | Throughput, latency, parallelism, ASIC scalability |
-| [docs/timing_strategy.md](docs/timing_strategy.md) | XDC decisions, false-path rationale, hold margin strategy |
-| [docs/ila_guide.md](docs/ila_guide.md) | ILA ChipScope setup and trigger configuration |
-| [docs/expected_outputs.md](docs/expected_outputs.md) | Reference simulation and synthesis outputs |
-| [CHANGELOG.md](CHANGELOG.md) | Engineering revision history — all bugs and fixes |
 
 ---
 
