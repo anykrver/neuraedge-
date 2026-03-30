@@ -1,4 +1,4 @@
-# NeuraEdge v2.3.0
+# NeuraEdge v2.1.0
 
 > 2×2 LIF cluster mesh neuromorphic accelerator — SystemVerilog, Verilator simulation, timing closure at 100 MHz on Artix-7, online STDP learning with activity-gated power optimisation.
 
@@ -10,7 +10,7 @@
 
 ---
 
-NeuraEdge v1 was a single LIF neuron on a Basys 3. **NeuraEdge v2** adds a 2×2 mesh NoC with credit-based flow control, trace-based online STDP, DVS event input, and full timing closure at 100 MHz on Artix-7. v2.2.0 adds three hardware power optimisations: activity-gated `spikes_valid`, a `clk_en` that idles the learning engine when no events are queued, and a narrower 6-bit trace register. The design synthesises and programs without modification. Every engineering decision is documented.
+NeuraEdge v1 was a single LIF neuron on a Basys 3. **NeuraEdge v2** adds a 2×2 mesh NoC with credit-based flow control, trace-based online STDP, DVS event input, and full timing closure at 100 MHz on Artix-7. v2.1.0 adds three hardware power optimisations: activity-gated `spikes_valid`, a `clk_en` that idles the learning engine when no events are queued, and a narrower 6-bit trace register. The design synthesises and programs without modification. Every engineering decision is documented.
 
 ---
 
