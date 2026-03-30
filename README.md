@@ -357,21 +357,6 @@ See [`docs/scaling.md`](docs/scaling.md) for the full migration checklist and ne
 
 ---
 
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [docs/architecture.md](docs/architecture.md) | Module responsibilities, parameters, external interfaces |
-| [docs/timing_strategy.md](docs/timing_strategy.md) | XDC rationale, constraint decisions, known risks |
-| [docs/scaling.md](docs/scaling.md) | Scaling neurons, mesh size, ASIC migration |
-| [docs/ila_guide.md](docs/ila_guide.md) | ILA ChipScope debug setup |
-| [docs/ila_bringup_guide.md](docs/ila_bringup_guide.md) | Board bring-up checklist |
-| [docs/expected_outputs.md](docs/expected_outputs.md) | Reference simulation and synthesis outputs |
-| [docs/sim_hardware_disclaimer.md](docs/sim_hardware_disclaimer.md) | What simulation validates vs what needs hardware |
-| [CHANGELOG.md](CHANGELOG.md) | Full revision history with bug descriptions |
-
----
-
 ## Tech Stack
 
 - **HDL**: SystemVerilog / Verilog-2001 compatible RTL
